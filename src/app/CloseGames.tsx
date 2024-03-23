@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { sortBy } from 'lodash'
+import { orderBy } from 'lodash'
 import { Contest } from './page'
 
 function useGames(
@@ -17,7 +17,7 @@ function useGames(
 			const games = await getScores()
 			setGames(games)
 			setFetching(false)
-		}, 30000)
+		}, 15000)
 
 		function cleanup() {
 			clearInterval(intervalHandle)
@@ -53,15 +53,19 @@ type Props = {
 export default function CloseGames({ getScores, initialGames }: Props) {
 	const { games, fetching } = useGames(initialGames, getScores)
 
-	const sortedGames = sortBy(
+	const sortedGames = orderBy(
 		games,
-		(g) => isClose(g),
-		(g) => Math.abs(g.teams[0].score - g.teams[1].score)
-	).filter((g) => g.gameState === 'I')
+		[
+			(g) => g.gameState === 'I',
+			(g) => isClose(g),
+			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
+		],
+		['desc', 'desc']
+	).filter((g) => g.gameState === 'I' || g.gameState === 'F')
 
 	return (
 		<>
-			<main className="container mx-auto min-h-96">
+			<main className="container mx-auto min-h-96 px-1">
 				<div className="flex">
 					<h1 className="grow">ncaa close games</h1>
 					<p className={fetching ? undefined : 'invisible'}>updating...</p>
@@ -75,12 +79,20 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 						return (
 							<div
 								key={g.contestId}
-								className={`space-y-3${g.gameState === 'I' ? '' : ' hidden'}`}
+								className={`space-y-1${
+									g.gameState === 'I' || g.gameState === 'F' ? '' : ' hidden'
+								}${g.gameState === 'F' ? ' text-black/50' : ''}`}
 							>
-								{isClose_ ? <div>Close game!</div> : null}
+								{isClose_ ? (
+									<div>
+										<strong>Close game!</strong>
+									</div>
+								) : null}
 								<div>
 									{g.currentPeriod === 'HALFTIME'
 										? 'Halftime'
+										: g.gameState === 'F'
+										? 'Final'
 										: `${g.currentPeriod} - ${g.contestClock}`}
 								</div>
 								<div className={`flex gap-5`}>

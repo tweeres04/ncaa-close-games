@@ -36,7 +36,7 @@ export default async function Home() {
 	async function getScores() {
 		'use server'
 		const scoresResponse: ScoresResponse = await fetch(scoresUrl, {
-			next: { revalidate: 60 },
+			next: { revalidate: 30 },
 		}).then((response) => response.json())
 
 		return scoresResponse.data.mmlContests
