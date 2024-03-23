@@ -126,9 +126,10 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 		[
 			(g) => isClose(g),
 			(g) => isUpset(g),
+			(g) => g.period,
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
-		['desc', 'desc'] // boolean results need desc sorting
+		['desc', 'desc', 'desc'] // boolean results need desc sorting
 	).filter((g) => g.gameState === 'I')
 	const finishedGames = orderBy(
 		games,
@@ -176,6 +177,7 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 							<ol className="list-decimal list-inside pl-2">
 								<li>Close games</li>
 								<li>Upsets</li>
+								<li>Games in second half</li>
 								<li>Point difference, smallest first</li>
 							</ol>
 						</li>
