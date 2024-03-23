@@ -78,7 +78,7 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 					<h1 className="grow">ncaa close games</h1>
 					<p className={fetching ? undefined : 'invisible'}>updating...</p>
 				</div>
-				{sortedGames && sortedGames.length < 1 ? 'No live games' : null}
+				{sortedGames && sortedGames.length < 1 ? 'No games today yet' : null}
 				<div className="space-y-5">
 					{sortedGames?.map((g) => {
 						const team1 = g.teams[0]
