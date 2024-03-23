@@ -16,11 +16,14 @@ function useGames(
 	const [fetching, setFetching] = useState(false)
 
 	useEffect(() => {
-		const intervalHandle = setInterval(async () => {
+		async function fetchGames() {
 			setFetching(true)
 			const games = await getScores().finally(() => setFetching(false))
 			setGames(games)
-		}, 15000)
+		}
+
+		const intervalHandle = setInterval(fetchGames, 15000)
+		fetchGames()
 
 		function cleanup() {
 			clearInterval(intervalHandle)
