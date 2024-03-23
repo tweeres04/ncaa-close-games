@@ -54,7 +54,9 @@ function isClose(game: Contest) {
 	const secondsRemainingInPeriod = minutes * 60 + seconds
 
 	return (
-		period === 2 && scoreDifference <= 10 && secondsRemainingInPeriod <= 300
+		((period === 2 && secondsRemainingInPeriod <= 300) ||
+			game.gameState === 'F') &&
+		scoreDifference <= 10
 	)
 }
 
