@@ -70,7 +70,7 @@ function Game({ game }: { game: Contest }) {
 			key={game.contestId}
 			className={`space-y-1${
 				game.gameState === 'I' || game.gameState === 'F' ? '' : ' hidden'
-			}${game.gameState === 'F' ? ' text-black/50' : ''}`}
+			}${game.gameState === 'F' ? ' text-black/40' : ''}`}
 		>
 			{isClose_ ? (
 				<div>
@@ -170,11 +170,24 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 				<p>{explanation}</p>
 				<h3 className="text-lg">How are games sorted?</h3>
 				<p>
-					<ol className="list-decimal list-inside">
-						<li>Close games</li>
-						<li>Upsets</li>
-						<li>Point difference, smallest first</li>
-					</ol>
+					<ul className="list-inside">
+						<li>In progress games:</li>
+						<li className="list-none">
+							<ol className="list-decimal list-inside pl-2">
+								<li>Close games</li>
+								<li>Upsets</li>
+								<li>Point difference, smallest first</li>
+							</ol>
+						</li>
+						<li>Completed games:</li>
+						<li className="list-none">
+							<ol className="list-decimal list-inside pl-2">
+								<li>Upsets</li>
+								<li>Close games</li>
+								<li>Point difference, smallest first</li>
+							</ol>
+						</li>
+					</ul>
 				</p>
 				<p>
 					<a
