@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { orderBy } from 'lodash'
+import Image from 'next/image'
+
 import { Contest } from './page'
+import basketballImage from '../../public/basketball.png'
 
 function useGames(
 	initialGames: Contest[],
@@ -66,6 +69,11 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 	return (
 		<>
 			<main className="container mx-auto min-h-96 px-1">
+				<Image
+					src={basketballImage}
+					alt="Basketball background"
+					className="fixed bottom-0 right-0 bg-orange-50/10 opacity-10 w-60 sm:w-auto"
+				/>
 				<div className="flex">
 					<h1 className="grow">ncaa close games</h1>
 					<p className={fetching ? undefined : 'invisible'}>updating...</p>
