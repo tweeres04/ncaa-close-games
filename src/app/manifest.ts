@@ -10,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
 		start_url: '/',
 		display: 'standalone',
 		background_color: 'rgb(255 247 237)',
-		theme_color: '#fff',
+		theme_color: 'rgb(255 247 237)',
 		icons: [
 			{
 				src: '/basketball.png',
