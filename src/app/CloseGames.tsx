@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { orderBy } from 'lodash'
 import Image from 'next/image'
 
+import { explanation } from './metadata'
 import { Contest } from './page'
 import basketballImage from '../../public/basketball.png'
 
@@ -17,9 +18,8 @@ function useGames(
 	useEffect(() => {
 		const intervalHandle = setInterval(async () => {
 			setFetching(true)
-			const games = await getScores()
+			const games = await getScores().finally(() => setFetching(false))
 			setGames(games)
-			setFetching(false)
 		}, 15000)
 
 		function cleanup() {
@@ -30,6 +30,16 @@ function useGames(
 	}, [getScores])
 
 	return { games, fetching }
+}
+
+function isUpset(game: Contest) {
+	const team1 = game.teams[0]
+	const team2 = game.teams[1]
+
+	return (
+		(team1.seed > team2.seed && team1.score > team2.score) ||
+		(team2.seed > team1.seed && team2.score > team1.score)
+	)
 }
 
 function isClose(game: Contest) {
@@ -61,9 +71,10 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 		[
 			(g) => g.gameState === 'I',
 			(g) => isClose(g),
+			(g) => isUpset(g),
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
-		['desc', 'desc']
+		['desc', 'desc', 'desc'] // boolean results need desc sorting
 	).filter((g) => g.gameState === 'I' || g.gameState === 'F')
 
 	return (
@@ -84,6 +95,7 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 						const team1 = g.teams[0]
 						const team2 = g.teams[1]
 						const isClose_ = isClose(g)
+						const isUpset_ = isUpset(g)
 						return (
 							<div
 								key={g.contestId}
@@ -94,6 +106,13 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 								{isClose_ ? (
 									<div>
 										<strong>Close game!</strong>
+									</div>
+								) : null}
+								{isUpset_ ? (
+									<div>
+										<strong>
+											{g.gameState === 'F' ? 'Upset' : 'Potential upset'}
+										</strong>
 									</div>
 								) : null}
 								<div>
@@ -126,13 +145,26 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 					})}
 				</div>
 			</main>
-			<footer className="text-xs p-32">
-				<a
-					href="https://www.flaticon.com/free-icons/basketball"
-					title="basketball icons"
-				>
-					Basketball icons created by ranksol graphics - Flaticon
-				</a>
+			<footer className="container mx-auto text-xs p-1 space-y-2 mt-3">
+				<h2 className="text-2xl">FAQ</h2>
+				<h3 className="text-lg">What&apos;s a close game?</h3>
+				<p>{explanation}</p>
+				<h3 className="text-lg">How are games sorted?</h3>
+				<p>
+					<ol className="list-decimal list-inside">
+						<li>Close games</li>
+						<li>Upsets</li>
+						<li>Point difference, smallest first</li>
+					</ol>
+				</p>
+				<p>
+					<a
+						href="https://www.flaticon.com/free-icons/basketball"
+						title="basketball icons"
+					>
+						Basketball icons created by ranksol graphics - Flaticon
+					</a>
+				</p>
 			</footer>
 		</>
 	)
