@@ -14,11 +14,15 @@ function useGames(
 ) {
 	const [games, setGames] = useState<Contest[]>(initialGames)
 	const [fetching, setFetching] = useState(false)
+	const [firstFetch, setFirstFetch] = useState(true)
 
 	useEffect(() => {
 		async function fetchGames() {
 			setFetching(true)
-			const games = await getScores().finally(() => setFetching(false))
+			const games = await getScores().finally(() => {
+				setFetching(false)
+				setFirstFetch(false)
+			})
 			setGames(games)
 		}
 
@@ -32,7 +36,7 @@ function useGames(
 		return cleanup
 	}, [getScores])
 
-	return { games, fetching }
+	return { games, fetching, firstFetch }
 }
 
 function isUpset(game: Contest) {
@@ -122,7 +126,7 @@ type Props = {
 }
 
 export default function CloseGames({ getScores, initialGames }: Props) {
-	const { games, fetching } = useGames(initialGames, getScores)
+	const { games, fetching, firstFetch } = useGames(initialGames, getScores)
 
 	const inProgressGames = orderBy(
 		games,
@@ -154,7 +158,9 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 				/>
 				<div className="flex">
 					<h1 className="grow">ncaa close games</h1>
-					<p className={fetching ? undefined : 'invisible'}>updating...</p>
+					<p className={fetching && !firstFetch ? undefined : 'invisible'}>
+						updating...
+					</p>
 				</div>
 				{[...inProgressGames, ...finishedGames].length < 1
 					? 'No games today yet'
