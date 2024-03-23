@@ -60,6 +60,59 @@ function isClose(game: Contest) {
 	)
 }
 
+function Game({ game }: { game: Contest }) {
+	const team1 = game.teams[0]
+	const team2 = game.teams[1]
+	const isClose_ = isClose(game)
+	const isUpset_ = isUpset(game)
+	return (
+		<div
+			key={game.contestId}
+			className={`space-y-1${
+				game.gameState === 'I' || game.gameState === 'F' ? '' : ' hidden'
+			}${game.gameState === 'F' ? ' text-black/50' : ''}`}
+		>
+			{isClose_ ? (
+				<div>
+					<strong>Close game{game.gameState === 'F' ? '' : '!'}</strong>
+				</div>
+			) : null}
+			{isUpset_ ? (
+				<div>
+					<strong>
+						{game.gameState === 'F' ? 'Upset' : 'Potential upset'}
+					</strong>
+				</div>
+			) : null}
+			<div>
+				{game.currentPeriod === 'HALFTIME'
+					? 'Halftime'
+					: game.gameState === 'F'
+					? 'Final'
+					: `${game.currentPeriod} - ${game.contestClock}`}
+			</div>
+			<div className={`flex gap-5`}>
+				<div>
+					<div className="text-sm">
+						{team1.record} - {team1.seed} seed
+					</div>
+					<div className="text-lg">
+						{team1.nameShort} {team1.score}
+					</div>
+				</div>
+				<div>
+					<div className="text-sm">
+						{team2.record} - {team2.seed} seed
+					</div>
+					<div className="text-lg">
+						{team2.score} {team2.nameShort}
+					</div>
+				</div>
+			</div>
+		</div>
+	)
+}
+
 type Props = {
 	getScores: () => Promise<Contest[]>
 	initialGames: Contest[]
@@ -68,16 +121,24 @@ type Props = {
 export default function CloseGames({ getScores, initialGames }: Props) {
 	const { games, fetching } = useGames(initialGames, getScores)
 
-	const sortedGames = orderBy(
+	const inProgressGames = orderBy(
 		games,
 		[
-			(g) => g.gameState === 'I',
 			(g) => isClose(g),
 			(g) => isUpset(g),
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
-		['desc', 'desc', 'desc'] // boolean results need desc sorting
-	).filter((g) => g.gameState === 'I' || g.gameState === 'F')
+		['desc', 'desc'] // boolean results need desc sorting
+	).filter((g) => g.gameState === 'I')
+	const finishedGames = orderBy(
+		games,
+		[
+			(g) => isUpset(g),
+			(g) => isClose(g),
+			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
+		],
+		['desc', 'desc'] // boolean results need desc sorting
+	).filter((g) => g.gameState === 'F')
 
 	return (
 		<>
@@ -91,60 +152,16 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 					<h1 className="grow">ncaa close games</h1>
 					<p className={fetching ? undefined : 'invisible'}>updating...</p>
 				</div>
-				{sortedGames && sortedGames.length < 1 ? 'No games today yet' : null}
+				{[...inProgressGames, ...finishedGames].length < 1
+					? 'No games today yet'
+					: null}
 				<div className="space-y-5">
-					{sortedGames?.map((g) => {
-						const team1 = g.teams[0]
-						const team2 = g.teams[1]
-						const isClose_ = isClose(g)
-						const isUpset_ = isUpset(g)
-						return (
-							<div
-								key={g.contestId}
-								className={`space-y-1${
-									g.gameState === 'I' || g.gameState === 'F' ? '' : ' hidden'
-								}${g.gameState === 'F' ? ' text-black/50' : ''}`}
-							>
-								{isClose_ ? (
-									<div>
-										<strong>Close game!</strong>
-									</div>
-								) : null}
-								{isUpset_ ? (
-									<div>
-										<strong>
-											{g.gameState === 'F' ? 'Upset' : 'Potential upset'}
-										</strong>
-									</div>
-								) : null}
-								<div>
-									{g.currentPeriod === 'HALFTIME'
-										? 'Halftime'
-										: g.gameState === 'F'
-										? 'Final'
-										: `${g.currentPeriod} - ${g.contestClock}`}
-								</div>
-								<div className={`flex gap-5`}>
-									<div>
-										<div className="text-sm">
-											{team1.record} - {team1.seed} seed
-										</div>
-										<div className="text-lg">
-											{team1.nameShort} {team1.score}
-										</div>
-									</div>
-									<div>
-										<div className="text-sm">
-											{team2.record} - {team2.seed} seed
-										</div>
-										<div className="text-lg">
-											{team2.score} {team2.nameShort}
-										</div>
-									</div>
-								</div>
-							</div>
-						)
-					})}
+					{inProgressGames?.map((g) => (
+						<Game key={g.contestId} game={g} />
+					))}
+					{finishedGames?.map((g) => (
+						<Game key={g.contestId} game={g} />
+					))}
 				</div>
 			</main>
 			<footer className="container mx-auto text-xs p-1 space-y-2 mt-3">
