@@ -185,7 +185,7 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 						<li className="list-none">
 							<ol className="list-decimal list-inside pl-2">
 								<li>Close games</li>
-								<li>Upsets</li>
+								<li>Potential upsets</li>
 								<li>Games in second half</li>
 								<li>Point difference, smallest first</li>
 							</ol>
