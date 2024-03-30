@@ -1,18 +1,17 @@
 'use client'
 
+import Link from 'next/link'
+
 import { useEffect, useState } from 'react'
-import { orderBy } from 'lodash'
+import { capitalize, orderBy, startCase } from 'lodash'
 import Image from 'next/image'
 
 import { explanation } from './metadata'
-import { Contest } from './page'
+import type { Game } from './models'
 import basketballImage from '../../public/basketball.png'
 
-function useGames(
-	initialGames: Contest[],
-	getScores: () => Promise<Contest[]>
-) {
-	const [games, setGames] = useState<Contest[]>(initialGames)
+function useGames(initialGames: Game[], getScores: () => Promise<Game[]>) {
+	const [games, setGames] = useState<Game[]>(initialGames)
 	const [fetching, setFetching] = useState(false)
 	const [firstFetch, setFirstFetch] = useState(true)
 
@@ -39,7 +38,7 @@ function useGames(
 	return { games, fetching, firstFetch }
 }
 
-function isUpset(game: Contest) {
+function isUpset(game: Game) {
 	const team1 = game.teams[0]
 	const team2 = game.teams[1]
 
@@ -49,7 +48,7 @@ function isUpset(game: Contest) {
 	)
 }
 
-function isClose(game: Contest) {
+function isClose(game: Game) {
 	const team1 = game.teams[0]
 	const team2 = game.teams[1]
 	const scoreDifference = Math.abs(team1.score - team2.score)
@@ -61,42 +60,46 @@ function isClose(game: Contest) {
 	const secondsRemainingInPeriod = minutes * 60 + seconds
 
 	return (
-		((period === 2 && secondsRemainingInPeriod <= 300) ||
-			game.gameState === 'F') &&
+		((((game.gender === 'men' && period === 2) ||
+			(game.gender === 'women' && period === 4)) &&
+			secondsRemainingInPeriod <= 300) ||
+			game.gameState === 'final') &&
 		scoreDifference <= 10
 	)
 }
 
-function Game({ game }: { game: Contest }) {
+function Game({ game }: { game: Game }) {
 	const team1 = game.teams[0]
 	const team2 = game.teams[1]
 	const isClose_ = isClose(game)
 	const isUpset_ = isUpset(game)
 	return (
 		<div
-			key={game.contestId}
+			key={game.id}
 			className={`space-y-1${
-				game.gameState === 'I' || game.gameState === 'F' ? '' : ' hidden'
-			}${game.gameState === 'F' ? ' text-black/40' : ''}`}
+				game.gameState === 'live' || game.gameState === 'final' ? '' : ' hidden'
+			}${game.gameState === 'final' ? ' text-black/40' : ''}`}
 		>
 			{isClose_ ? (
 				<div>
-					<strong>Close game{game.gameState === 'F' ? '' : '!'}</strong>
+					<strong>Close game{game.gameState === 'final' ? '' : '!'}</strong>
 				</div>
 			) : null}
 			{isUpset_ ? (
 				<div>
 					<strong>
-						{game.gameState === 'F' ? 'Upset' : 'Potential upset'}
+						{game.gameState === 'final' ? 'Upset' : 'Potential upset'}
 					</strong>
 				</div>
 			) : null}
 			<div>
-				{game.currentPeriod === 'HALFTIME'
-					? 'Halftime'
-					: game.gameState === 'F'
+				{game.gameState === 'final'
 					? 'Final'
-					: `${game.currentPeriod} - ${game.contestClock}`}
+					: game.period === null
+					? game.periodText
+					: `${startCase(game.periodText.toLowerCase())} - ${
+							game.contestClock
+					  }`}
 			</div>
 			<div className={`flex gap-5`}>
 				<div>
@@ -121,11 +124,12 @@ function Game({ game }: { game: Contest }) {
 }
 
 type Props = {
-	getScores: () => Promise<Contest[]>
-	initialGames: Contest[]
+	gender: string
+	getScores: () => Promise<Game[]>
+	initialGames: Game[]
 }
 
-export default function CloseGames({ getScores, initialGames }: Props) {
+export default function CloseGames({ gender, getScores, initialGames }: Props) {
 	const { games, fetching, firstFetch } = useGames(initialGames, getScores)
 
 	const inProgressGames = orderBy(
@@ -137,7 +141,7 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
 		['desc', 'desc', 'desc'] // boolean results need desc sorting
-	).filter((g) => g.gameState === 'I')
+	).filter((g) => g.gameState === 'live')
 	const finishedGames = orderBy(
 		games,
 		[
@@ -146,7 +150,7 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
 		['desc', 'desc'] // boolean results need desc sorting
-	).filter((g) => g.gameState === 'F')
+	).filter((g) => g.gameState === 'final')
 
 	return (
 		<>
@@ -157,20 +161,28 @@ export default function CloseGames({ getScores, initialGames }: Props) {
 					className="fixed bottom-0 right-0 bg-orange-50/10 opacity-10 w-60 sm:w-auto"
 				/>
 				<div className="flex">
-					<h1 className="grow">ncaa close games</h1>
+					<h1 className="grow">ncaa close games - {capitalize(gender)}</h1>
 					<p className={fetching && !firstFetch ? undefined : 'invisible'}>
 						updating...
 					</p>
+				</div>
+				<div className="flex gap-3 mb-3">
+					<Link href="/men" className="text-lg">
+						Men
+					</Link>
+					<Link href="/women" className="text-lg">
+						Women
+					</Link>
 				</div>
 				{[...inProgressGames, ...finishedGames].length < 1
 					? 'No games today yet'
 					: null}
 				<div className="space-y-5">
 					{inProgressGames?.map((g) => (
-						<Game key={g.contestId} game={g} />
+						<Game key={g.id} game={g} />
 					))}
 					{finishedGames?.map((g) => (
-						<Game key={g.contestId} game={g} />
+						<Game key={g.id} game={g} />
 					))}
 				</div>
 			</main>
