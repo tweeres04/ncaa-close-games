@@ -123,7 +123,7 @@ function Game({ game }: { game: Game }) {
 				{game.gameState === 'final'
 					? 'Final'
 					: game.period === null
-					? game.periodText
+					? startCase(game.periodText.toLowerCase())
 					: `${startCase(game.periodText.toLowerCase())} - ${
 							game.contestClock
 					  }`}
