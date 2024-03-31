@@ -150,6 +150,17 @@ function Game({ game }: { game: Game }) {
 	)
 }
 
+function useDefaultGenderCookie() {
+	useEffect(() => {
+		const { pathname } = window.location
+
+		const pathParts = pathname.split('/')
+		if (pathParts[1]) {
+			Cookie.set('default_gender', pathParts[1], { expires: 7 })
+		}
+	}, [])
+}
+
 type Props = {
 	gender: Gender
 	getScores: (gender: Gender) => Promise<Game[]>
@@ -163,14 +174,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 		getScores
 	)
 
-	useEffect(() => {
-		const { pathname } = window.location
-
-		const pathParts = pathname.split('/')
-		if (pathParts[1]) {
-			Cookie.set('default_gender', pathParts[1], { expires: 7 })
-		}
-	}, [])
+	useDefaultGenderCookie()
 
 	return (
 		<>
@@ -187,10 +191,10 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 					</p>
 				</div>
 				<div className="flex gap-3 mb-3">
-					<Link href="/men" className="text-lg">
+					<Link href="/men" className="text-xl">
 						Men
 					</Link>
-					<Link href="/women" className="text-lg">
+					<Link href="/women" className="text-xl">
 						Women
 					</Link>
 				</div>
