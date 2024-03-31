@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import CloseGames from './CloseGames'
 import {
 	menContestToGame,
@@ -42,10 +43,12 @@ export async function getScores(gender: Gender) {
 }
 
 export default async function CloseGamesServer({
-	params: { gender = 'men' },
+	params: { gender },
 }: {
 	params: { gender: Gender }
 }) {
+	gender = gender ?? cookies().get('default_gender')?.value ?? 'men'
+
 	const games = await getScores(gender)
 
 	return (

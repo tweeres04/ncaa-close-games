@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 import { capitalize, orderBy, startCase } from 'lodash'
 import Image from 'next/image'
 
+import Cookie from 'js-cookie'
+
 import { explanation } from './metadata'
 import type { Game, Gender } from './models'
 import basketballImage from '../../public/basketball.png'
@@ -160,6 +162,15 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 		initialGames,
 		getScores
 	)
+
+	useEffect(() => {
+		const { pathname } = window.location
+
+		const pathParts = pathname.split('/')
+		if (pathParts[1]) {
+			Cookie.set('default_gender', pathParts[1], { expires: 7 })
+		}
+	}, [])
 
 	return (
 		<>
