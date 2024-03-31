@@ -7,10 +7,14 @@ import { capitalize, orderBy, startCase } from 'lodash'
 import Image from 'next/image'
 
 import { explanation } from './metadata'
-import type { Game } from './models'
+import type { Game, Gender } from './models'
 import basketballImage from '../../public/basketball.png'
 
-function useGames(initialGames: Game[], getScores: () => Promise<Game[]>) {
+function useGames(
+	gender: Gender,
+	initialGames: Game[],
+	getScores: (gender: Gender) => Promise<Game[]>
+) {
 	const [games, setGames] = useState<Game[]>(initialGames)
 	const [fetching, setFetching] = useState(false)
 	const [firstFetch, setFirstFetch] = useState(true)
@@ -18,7 +22,7 @@ function useGames(initialGames: Game[], getScores: () => Promise<Game[]>) {
 	useEffect(() => {
 		async function fetchGames() {
 			setFetching(true)
-			const games = await getScores().finally(() => {
+			const games = await getScores(gender).finally(() => {
 				setFetching(false)
 				setFirstFetch(false)
 			})
@@ -33,9 +37,30 @@ function useGames(initialGames: Game[], getScores: () => Promise<Game[]>) {
 		}
 
 		return cleanup
-	}, [getScores])
+	}, [gender, getScores])
 
-	return { games, fetching, firstFetch }
+	const inProgressGames = orderBy(
+		games,
+		[
+			(g) => isClose(g),
+			(g) => isUpset(g),
+			(g) => g.period,
+			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
+		],
+		['desc', 'desc', 'desc'] // boolean results need desc sorting
+	).filter((g) => g.gameState === 'live')
+
+	const finishedGames = orderBy(
+		games,
+		[
+			(g) => isUpset(g),
+			(g) => isClose(g),
+			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
+		],
+		['desc', 'desc'] // boolean results need desc sorting
+	).filter((g) => g.gameState === 'final')
+
+	return { games, inProgressGames, finishedGames, fetching, firstFetch }
 }
 
 function isUpset(game: Game) {
@@ -124,33 +149,17 @@ function Game({ game }: { game: Game }) {
 }
 
 type Props = {
-	gender: string
-	getScores: () => Promise<Game[]>
+	gender: Gender
+	getScores: (gender: Gender) => Promise<Game[]>
 	initialGames: Game[]
 }
 
 export default function CloseGames({ gender, getScores, initialGames }: Props) {
-	const { games, fetching, firstFetch } = useGames(initialGames, getScores)
-
-	const inProgressGames = orderBy(
-		games,
-		[
-			(g) => isClose(g),
-			(g) => isUpset(g),
-			(g) => g.period,
-			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
-		],
-		['desc', 'desc', 'desc'] // boolean results need desc sorting
-	).filter((g) => g.gameState === 'live')
-	const finishedGames = orderBy(
-		games,
-		[
-			(g) => isUpset(g),
-			(g) => isClose(g),
-			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
-		],
-		['desc', 'desc'] // boolean results need desc sorting
-	).filter((g) => g.gameState === 'final')
+	const { inProgressGames, finishedGames, fetching, firstFetch } = useGames(
+		gender,
+		initialGames,
+		getScores
+	)
 
 	return (
 		<>

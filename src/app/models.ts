@@ -1,3 +1,5 @@
+export type Gender = 'men' | 'women'
+
 export type MenTeam = {
 	isHome: boolean
 	score: number
@@ -57,7 +59,7 @@ export type Game = {
 	periodText: string
 	contestClock: string
 	gameState: 'final' | 'live' | 'pre'
-	gender: 'men' | 'women'
+	gender: Gender
 }
 
 const menGameStateToGameState: Record<Contest['gameState'], Game['gameState']> =
