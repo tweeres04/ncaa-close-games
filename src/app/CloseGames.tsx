@@ -133,7 +133,11 @@ function Game({ game }: { game: Game }) {
 					<div className="text-sm">
 						{team1.record} - {team1.seed} seed
 					</div>
-					<div className="text-lg">
+					<div
+						className={`text-lg${
+							team1.score > team2.score ? ' font-bold' : ''
+						}`}
+					>
 						{team1.nameShort} {team1.score}
 					</div>
 				</div>
@@ -141,7 +145,11 @@ function Game({ game }: { game: Game }) {
 					<div className="text-sm">
 						{team2.record} - {team2.seed} seed
 					</div>
-					<div className="text-lg">
+					<div
+						className={`text-lg${
+							team2.score > team1.score ? ' font-bold' : ''
+						}`}
+					>
 						{team2.score} {team2.nameShort}
 					</div>
 				</div>
