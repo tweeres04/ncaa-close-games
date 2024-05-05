@@ -6,9 +6,13 @@ export async function generateMetadata({
 }: {
 	params: { gender: Gender }
 }): Promise<Metadata> {
+	const url = `https://ncaa-close-games.tweeres.ca/${params.gender}`
 	return {
 		alternates: {
-			canonical: `https://ncaa-close-games.tweeres.ca/${params.gender}`,
+			canonical: url,
+		},
+		openGraph: {
+			url,
 		},
 	}
 }
