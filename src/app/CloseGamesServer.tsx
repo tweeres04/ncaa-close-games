@@ -15,6 +15,7 @@ type MenScoresResponse = {
 }
 
 type WomenScoresResponse = {
+	Message?: string
 	games: { game: WomenGame }[]
 }
 
@@ -53,9 +54,11 @@ export async function getScores(gender: Gender) {
 				menContestToGame
 		  )
 		: gender === 'women'
-		? (scoresResponse as WomenScoresResponse).games
-				.map(({ game }) => game)
-				.map(womenGameToGame)
+		? (scoresResponse as WomenScoresResponse)?.Message === 'Object not found.'
+			? []
+			: (scoresResponse as WomenScoresResponse).games
+					.map(({ game }) => game)
+					.map(womenGameToGame)
 		: []
 }
 
