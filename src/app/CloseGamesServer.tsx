@@ -5,8 +5,10 @@ import {
 	womenGameToGame,
 	Contest,
 	WomenGame,
+	genders,
 	Gender,
 } from './models'
+import { notFound } from 'next/navigation'
 
 type MenScoresResponse = {
 	data: { mmlContests: Contest[] }
@@ -33,6 +35,10 @@ const scoresUrls = {
 
 export async function getScores(gender: Gender) {
 	'use server'
+
+	if (!genders.includes(gender)) {
+		notFound()
+	}
 
 	const url = scoresUrls[gender]()
 	const scoresResponse: MenScoresResponse | WomenScoresResponse = await fetch(

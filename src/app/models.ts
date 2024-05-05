@@ -1,4 +1,5 @@
-export type Gender = 'men' | 'women'
+export const genders = ['men', 'women'] as const
+export type Gender = (typeof genders)[number]
 
 export type MenTeam = {
 	isHome: boolean
