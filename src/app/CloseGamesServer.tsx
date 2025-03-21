@@ -9,6 +9,48 @@ import {
 	Gender,
 } from './models'
 import { notFound } from 'next/navigation'
+import { Metadata } from 'next'
+
+export async function generateMetadata({
+	params,
+}: {
+	params: { gender: Gender }
+}): Promise<Metadata> {
+	const genderText = params.gender === 'women' ? "Women's" : "Men's"
+	const url = `https://ncaa-close-games.tweeres.ca/${params.gender ?? 'men'}`
+	const title = `${genderText} March Madness Games Today (2025) | Live Score Tracker`
+	const description = `Track today's ${genderText.toLowerCase()} March Madness games live. My smart sorting shows close games and potential upsets at the top so you never miss the most exciting NCAA tournament action.`
+
+	return {
+		title,
+		description,
+		alternates: {
+			canonical: url,
+		},
+		openGraph: {
+			url,
+			title,
+			description,
+			siteName: 'NCAA Close Games Tracker',
+			type: 'website',
+			locale: 'en_US',
+			images: [
+				{
+					url: `https://ncaa-close-games.tweeres.ca/images/og-image.jpg`,
+					width: 1200,
+					height: 630,
+					alt: `${genderText} NCAA tournament close games tracker`,
+				},
+			],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: [`https://ncaa-close-games.tweeres.ca/images/og-image.jpg`],
+		},
+	}
+}
 
 type MenScoresResponse = {
 	data: { mmlContests: Contest[] }
