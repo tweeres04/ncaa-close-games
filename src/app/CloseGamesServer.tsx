@@ -78,9 +78,7 @@ const scoresUrls = {
 	women: () => {
 		const now = getNow()
 		const year = now.getFullYear()
-		const month = (now.getMonth() + 1).toString().padStart(2, '0')
-		const day = now.getDate().toString().padStart(2, '0')
-		return `https://data.ncaa.com/casablanca/scoreboard/basketball-women/d1/${year}/${month}/${day}/scoreboard.json`
+		return `https://sdataprod.ncaa.com/?meta=GetLiveSchedulePlusMmlEventVideo_web&extensions={%22persistedQuery%22:{%22version%22:1,%22sha256Hash%22:%225f2dd33c4660d1d169b65a67b86bc578258b93cadc45c0ff871e372ea57a9825%22}}&variables={%22seasonYear%22:${year - 1},%22current%22:true}`
 	},
 }
 
@@ -96,20 +94,18 @@ export async function getScores(gender: Gender) {
 		url,
 		{
 			next: { revalidate: 30 },
+		},
+	).then((response) => {
+		if (response.ok) {
+			return response.json()
+		} else {
+			response.text().then((error) => console.error(`API ERROR`, error))
 		}
-	).then((response) => response.json())
+	})
 
-	return gender === 'men'
-		? (scoresResponse as MenScoresResponse).data.mmlContests.map(
-				menContestToGame
-		  )
-		: gender === 'women'
-		? (scoresResponse as WomenScoresResponse)?.Message === 'Object not found.'
-			? []
-			: (scoresResponse as WomenScoresResponse).games
-					.map(({ game }) => game)
-					.map(womenGameToGame)
-		: []
+	return (scoresResponse as MenScoresResponse).data.mmlContests.map(
+		menContestToGame,
+	)
 }
 
 export default async function CloseGamesServer({

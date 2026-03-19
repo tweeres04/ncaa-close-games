@@ -15,7 +15,7 @@ import basketballImage from '../../public/basketball.png'
 function useGames(
 	gender: Gender,
 	initialGames: Game[],
-	getScores: (gender: Gender) => Promise<Game[]>
+	getScores: (gender: Gender) => Promise<Game[]>,
 ) {
 	const [games, setGames] = useState<Game[]>(initialGames)
 	const [fetching, setFetching] = useState(false)
@@ -49,7 +49,7 @@ function useGames(
 			(g) => g.period,
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
-		['desc', 'desc', 'desc'] // boolean results need desc sorting
+		['desc', 'desc', 'desc'], // boolean results need desc sorting
 	).filter((g) => g.gameState === 'live')
 
 	const finishedGames = orderBy(
@@ -59,7 +59,7 @@ function useGames(
 			(g) => isClose(g),
 			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
 		],
-		['desc', 'desc'] // boolean results need desc sorting
+		['desc', 'desc'], // boolean results need desc sorting
 	).filter((g) => g.gameState === 'final')
 
 	return { games, inProgressGames, finishedGames, fetching, firstFetch }
@@ -123,15 +123,15 @@ function Game({ game }: { game: Game }) {
 				{game.gameState === 'final'
 					? 'Final'
 					: game.period === null
-					? startCase(game.periodText.toLowerCase())
-					: `${startCase(game.periodText.toLowerCase())} - ${
-							game.contestClock
-					  }`}
+						? startCase(game.periodText.toLowerCase())
+						: `${startCase(game.periodText.toLowerCase())} - ${
+								game.contestClock
+							}`}
 			</div>
 			<div className={`flex gap-5`}>
 				<div>
 					<div className="text-sm">
-						{team1.record} - {team1.seed} seed
+						{team1.record ? `${team1.record} - ` : ''} {team1.seed} seed
 					</div>
 					<div
 						className={`text-lg${
@@ -143,7 +143,8 @@ function Game({ game }: { game: Game }) {
 				</div>
 				<div>
 					<div className="text-sm">
-						{team2.record} - {team2.seed} seed
+						{team2.record ? `${team1.record} - ` : ''}
+						{team2.seed} seed
 					</div>
 					<div
 						className={`text-lg${
@@ -179,7 +180,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 	const { inProgressGames, finishedGames, fetching, firstFetch } = useGames(
 		gender,
 		initialGames,
-		getScores
+		getScores,
 	)
 
 	useDefaultGenderCookie()
