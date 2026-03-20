@@ -212,12 +212,20 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 					</p>
 				</div>
 				<div className="flex gap-3 mb-3">
-					<Link href="/men" className="text-xl">
-						Men
-					</Link>
-					<Link href="/women" className="text-xl">
-						Women
-					</Link>
+					{gender === 'men' ? (
+						<span className="text-xl">Men</span>
+					) : (
+						<Link href="/men" className="text-xl">
+							Men
+						</Link>
+					)}
+					{gender === 'women' ? (
+						<span className="text-xl">Women</span>
+					) : (
+						<Link href="/women" className="text-xl">
+							Women
+						</Link>
+					)}
 				</div>
 				{[...inProgressGames, ...finishedGames].length < 1
 					? 'No games today yet'
