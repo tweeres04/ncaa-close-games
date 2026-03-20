@@ -103,7 +103,7 @@ function Game({ game }: { game: Game }) {
 	return (
 		<div
 			key={game.id}
-			className={`space-y-1${
+			className={`${
 				game.gameState === 'live' || game.gameState === 'final' ? '' : ' hidden'
 			}${game.gameState === 'final' ? ' text-black/40' : ''}`}
 		>
@@ -128,45 +128,49 @@ function Game({ game }: { game: Game }) {
 								game.contestClock
 							}`}
 			</div>
-		<div className={`flex gap-5`}>
-			<div>
-				<div className="text-sm">
-					{team1.record ? `${team1.record} - ` : ''} {team1.seed} seed
+			<div className={`flex gap-5`}>
+				<div>
+					<div className="text-sm">
+						{team1.record ? `${team1.record} - ` : ''} {team1.seed} seed
+					</div>
+					<div
+						className={`text-lg flex items-center gap-2${
+							team1.score > team2.score ? ' font-bold' : ''
+						}`}
+					>
+						<div className="w-8 h-8 flex items-center justify-center shrink-0">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={team1.logoUrl}
+								alt={`${team1.nameShort} logo`}
+								className="max-w-full max-h-full object-contain"
+							/>
+						</div>
+						{team1.nameShort} {team1.score}
+					</div>
 				</div>
-				<div
-					className={`text-lg flex items-center gap-2${
-						team1.score > team2.score ? ' font-bold' : ''
-					}`}
-				>
-					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img
-						src={team1.logoUrl}
-						alt={`${team1.nameShort} logo`}
-						className="w-8 h-8 object-contain"
-					/>
-					{team1.nameShort} {team1.score}
+				<div>
+					<div className="text-sm">
+						{team2.record ? `${team1.record} - ` : ''}
+						{team2.seed} seed
+					</div>
+					<div
+						className={`text-lg flex items-center gap-2${
+							team2.score > team1.score ? ' font-bold' : ''
+						}`}
+					>
+						<div className="w-8 h-8 flex items-center justify-center shrink-0">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={team2.logoUrl}
+								alt={`${team2.nameShort} logo`}
+								className="max-w-full max-h-full object-contain"
+							/>
+						</div>
+						{team2.score} {team2.nameShort}
+					</div>
 				</div>
 			</div>
-			<div>
-				<div className="text-sm">
-					{team2.record ? `${team1.record} - ` : ''}
-					{team2.seed} seed
-				</div>
-				<div
-					className={`text-lg flex items-center gap-2${
-						team2.score > team1.score ? ' font-bold' : ''
-					}`}
-				>
-					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img
-						src={team2.logoUrl}
-						alt={`${team2.nameShort} logo`}
-						className="w-8 h-8 object-contain"
-					/>
-					{team2.score} {team2.nameShort}
-				</div>
-			</div>
-		</div>
 		</div>
 	)
 }
@@ -211,7 +215,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 						updating...
 					</p>
 				</div>
-				<div className="flex gap-3 mb-3">
+				<div className="flex gap-3">
 					{gender === 'men' ? (
 						<span className="text-xl">Men</span>
 					) : (
@@ -230,7 +234,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 				{[...inProgressGames, ...finishedGames].length < 1
 					? 'No games today yet'
 					: null}
-				<div className="space-y-5">
+				<div className="space-y-8 my-12">
 					{inProgressGames?.map((g) => (
 						<Game key={g.id} game={g} />
 					))}
@@ -239,7 +243,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 					))}
 				</div>
 			</main>
-			<footer className="container mx-auto text-xs p-1 space-y-2 mt-3">
+			<footer className="container mx-auto text-xs p-1 space-y-2 mt-20">
 				<h2 className="text-2xl">FAQ</h2>
 				<h3 className="text-lg">What is this?</h3>
 				<p>A March Madness tracker with a focus on close games and upsets.</p>
