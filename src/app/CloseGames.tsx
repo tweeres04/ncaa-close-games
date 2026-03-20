@@ -246,7 +246,10 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 			<footer className="container mx-auto text-xs p-1 space-y-2 mt-20">
 				<h2 className="text-2xl">FAQ</h2>
 				<h3 className="text-lg">What is this?</h3>
-				<p>A March Madness tracker with a focus on close games and upsets.</p>
+				<p>
+					A March Madness tracker that shows exciting games (close, or potential
+					upset) at the top
+				</p>
 				<h3 className="text-lg">What&apos;s a close game?</h3>
 				<p>{explanation}</p>
 				<h3 className="text-lg">How are games sorted?</h3>
