@@ -7,6 +7,7 @@ export type MenTeam = {
 	color: string
 	seed: number
 	nameShort: string
+	seoname: string
 	record: string
 }
 
@@ -50,6 +51,7 @@ export type Team = {
 	seed: number
 	nameShort: string
 	record: string
+	logoUrl: string
 }
 
 export type Game = {
@@ -76,6 +78,7 @@ export function menTeamToTeam(team: MenTeam): Team {
 		seed: team.seed,
 		nameShort: team.nameShort,
 		record: team.record,
+		logoUrl: `https://www.ncaa.com/sites/default/files/images/logos/schools/bgl/${team.seoname}.svg`,
 	}
 }
 
@@ -98,6 +101,7 @@ export function womenTeamToTeam(team: WomenTeam): Team {
 		seed: team.seed,
 		nameShort: team.names.short,
 		record: team.description,
+		logoUrl: `https://www.ncaa.com/sites/default/files/images/logos/schools/bgl/${team.names.short.toLowerCase().replace(/\s+/g, '-')}.svg`,
 	}
 }
 

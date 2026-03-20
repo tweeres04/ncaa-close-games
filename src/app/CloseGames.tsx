@@ -128,33 +128,45 @@ function Game({ game }: { game: Game }) {
 								game.contestClock
 							}`}
 			</div>
-			<div className={`flex gap-5`}>
-				<div>
-					<div className="text-sm">
-						{team1.record ? `${team1.record} - ` : ''} {team1.seed} seed
-					</div>
-					<div
-						className={`text-lg${
-							team1.score > team2.score ? ' font-bold' : ''
-						}`}
-					>
-						{team1.nameShort} {team1.score}
-					</div>
+		<div className={`flex gap-5`}>
+			<div>
+				<div className="text-sm">
+					{team1.record ? `${team1.record} - ` : ''} {team1.seed} seed
 				</div>
-				<div>
-					<div className="text-sm">
-						{team2.record ? `${team1.record} - ` : ''}
-						{team2.seed} seed
-					</div>
-					<div
-						className={`text-lg${
-							team2.score > team1.score ? ' font-bold' : ''
-						}`}
-					>
-						{team2.score} {team2.nameShort}
-					</div>
+				<div
+					className={`text-lg flex items-center gap-2${
+						team1.score > team2.score ? ' font-bold' : ''
+					}`}
+				>
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						src={team1.logoUrl}
+						alt={`${team1.nameShort} logo`}
+						className="w-8 h-8 object-contain"
+					/>
+					{team1.nameShort} {team1.score}
 				</div>
 			</div>
+			<div>
+				<div className="text-sm">
+					{team2.record ? `${team1.record} - ` : ''}
+					{team2.seed} seed
+				</div>
+				<div
+					className={`text-lg flex items-center gap-2${
+						team2.score > team1.score ? ' font-bold' : ''
+					}`}
+				>
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						src={team2.logoUrl}
+						alt={`${team2.nameShort} logo`}
+						className="w-8 h-8 object-contain"
+					/>
+					{team2.score} {team2.nameShort}
+				</div>
+			</div>
+		</div>
 		</div>
 	)
 }
