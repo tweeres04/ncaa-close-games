@@ -57,8 +57,7 @@ type MenScoresResponse = {
 }
 
 type WomenScoresResponse = {
-	Message?: string
-	games: { game: WomenGame }[]
+	data: { contests: Contest[] }
 }
 
 function getNow() {
@@ -77,8 +76,11 @@ const scoresUrls = {
 	},
 	women: () => {
 		const now = getNow()
-		const year = now.getFullYear()
-		return `https://sdataprod.ncaa.com/?meta=GetLiveSchedulePlusMmlEventVideo_web&extensions={%22persistedQuery%22:{%22version%22:1,%22sha256Hash%22:%225f2dd33c4660d1d169b65a67b86bc578258b93cadc45c0ff871e372ea57a9825%22}}&variables={%22seasonYear%22:${year - 1},%22current%22:true}`
+		const year = now.getFullYear() - 1
+		const month = now.getMonth()
+		const dateString = now.toLocaleDateString().replace(/-/g, '/')
+		const url = `https://sdataprod.ncaa.com/?meta=GetLiveSchedulePlusMmlEventVideo_web&extensions={"persistedQuery":{"version":1,"sha256Hash":"6b26e5cda954c1302873c52835bfd223e169e2068b12511e92b3ef29fac779c2"}}&variables={"sportCode":"WBB","division":1,"seasonYear":${year},"month":${month},"contestDate":"${dateString}","week":null}`
+		return url
 	},
 }
 
@@ -90,22 +92,25 @@ export async function getScores(gender: Gender) {
 	}
 
 	const url = scoresUrls[gender]()
-	const scoresResponse: MenScoresResponse | WomenScoresResponse = await fetch(
-		url,
-		{
-			next: { revalidate: 30 },
-		},
-	).then((response) => {
+	const scoresResponse = await fetch(url, {
+		next: { revalidate: 30 },
+	}).then((response) => {
 		if (response.ok) {
 			return response.json()
 		} else {
-			response.text().then((error) => console.error(`API ERROR`, error))
+			response.text().then((error) => {
+				console.error(`API ERROR`, error)
+			})
 		}
 	})
 
-	return (scoresResponse as MenScoresResponse).data.mmlContests.map(
-		menContestToGame,
-	)
+	const contests =
+		gender === 'men'
+			? (scoresResponse as MenScoresResponse).data.mmlContests
+			: gender === 'women'
+				? (scoresResponse as WomenScoresResponse).data.contests
+				: []
+	return contests.map(menContestToGame)
 }
 
 export default async function CloseGamesServer({
