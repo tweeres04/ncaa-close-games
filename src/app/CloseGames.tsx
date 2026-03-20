@@ -151,7 +151,7 @@ function Game({ game }: { game: Game }) {
 				</div>
 				<div>
 					<div className="text-sm">
-						{team2.record ? `${team1.record} - ` : ''}
+						{team2.record ? `${team2.record} - ` : ''}
 						{team2.seed} seed
 					</div>
 					<div
