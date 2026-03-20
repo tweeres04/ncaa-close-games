@@ -210,7 +210,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 					className="fixed bottom-0 right-0 bg-orange-50/10 opacity-10 w-60 sm:w-auto"
 				/>
 				<div className="flex">
-					<h1 className="grow">ncaa close games - {capitalize(gender)}</h1>
+					<h1 className="grow">ncaa close games</h1>
 					<p className={fetching && !firstFetch ? undefined : 'invisible'}>
 						updating...
 					</p>
