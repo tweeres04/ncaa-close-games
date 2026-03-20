@@ -4,9 +4,6 @@
 
 html {
 	font-size: 18px;
-}
-
-body {
 	@apply bg-orange-50;
 }
 
