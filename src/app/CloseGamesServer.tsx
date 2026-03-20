@@ -18,7 +18,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const genderText = params.gender === 'women' ? "Women's" : "Men's"
 	const url = `https://ncaa-close-games.tweeres.ca/${params.gender ?? 'men'}`
-	const title = `${genderText} March Madness Games Today (2025) | Live Score Tracker`
+	const title = `${genderText} March Madness Games Today (${new Date().getFullYear()}) | Live Score Tracker`
 	const description = `Track today's ${genderText.toLowerCase()} March Madness games live. My smart sorting shows close games and potential upsets at the top so you never miss the most exciting NCAA tournament action.`
 
 	return {
