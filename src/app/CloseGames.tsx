@@ -243,7 +243,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 					))}
 				</div>
 			</main>
-			<footer className="container mx-auto text-xs p-1 space-y-2 mt-20">
+			<footer className="container mx-auto text-xs p-1 space-y-2 mt-20 pb-[env(safe-area-inset-bottom)]">
 				<h2 className="text-2xl">FAQ</h2>
 				<h3 className="text-lg">What is this?</h3>
 				<p>

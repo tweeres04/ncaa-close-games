@@ -1,5 +1,5 @@
 import { DM_Sans } from 'next/font/google'
-export { metadata } from './metadata'
+export { metadata, viewport } from './metadata'
 import { GoogleAnalytics } from '@next/third-parties/google'
 
 import './globals.css'
