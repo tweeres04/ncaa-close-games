@@ -27,11 +27,4 @@ export const metadata: Metadata = {
 			url: imageUrl,
 		},
 	},
-	openGraph: {
-		title,
-		description,
-		images: 'https://ncaa-close-games.tweeres.ca/og-image.jpg',
-		type: 'website',
-		url: 'https://ncaa-close-games.tweeres.ca',
-	},
 }
