@@ -123,6 +123,6 @@ export default async function CloseGamesServer({
 	const games = await getScores(gender)
 
 	return (
-		<CloseGames gender={gender} getScores={getScores} initialGames={games} />
+		<CloseGames key={gender} gender={gender} getScores={getScores} initialGames={games} />
 	)
 }
