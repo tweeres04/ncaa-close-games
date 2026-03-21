@@ -47,7 +47,7 @@ function Game({ game }: { game: Game }) {
 			<div className={`flex gap-5`}>
 				<div>
 					<div className="text-sm">
-						{team1.record ? `${team1.record} - ` : ''} {team1.seed} seed
+						{team1.record ? `${team1.record} - ` : ''} {team1.seed ? `${team1.seed} seed` : 'Unseeded'}
 					</div>
 					<div
 						className={`text-lg flex items-center gap-2${
@@ -68,7 +68,7 @@ function Game({ game }: { game: Game }) {
 				<div>
 					<div className="text-sm">
 						{team2.record ? `${team2.record} - ` : ''}
-						{team2.seed} seed
+						{team2.seed ? `${team2.seed} seed` : 'Unseeded'}
 					</div>
 					<div
 						className={`text-lg flex items-center gap-2${
