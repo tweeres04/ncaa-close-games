@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 
-import { useEffect, useState } from 'react'
-import { capitalize, orderBy, startCase } from 'lodash'
+import { useEffect, useTransition } from 'react'
+import { startCase } from 'lodash'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 import Cookie from 'js-cookie'
 
@@ -12,91 +13,9 @@ import { explanation } from './metadata'
 import type { Game, Gender } from './models'
 import basketballImage from '../../public/basketball.png'
 
-function useGames(
-	gender: Gender,
-	initialGames: Game[],
-	getScores: (gender: Gender) => Promise<Game[]>,
-) {
-	const [games, setGames] = useState<Game[]>(initialGames)
-	const [fetching, setFetching] = useState(false)
-
-	useEffect(() => {
-		async function fetchGames() {
-			setFetching(true)
-			const games = await getScores(gender).finally(() => {
-				setFetching(false)
-			})
-			setGames(games)
-		}
-
-		const intervalHandle = setInterval(fetchGames, 15000)
-
-		function cleanup() {
-			clearInterval(intervalHandle)
-		}
-
-		return cleanup
-	}, [gender, getScores])
-
-	const inProgressGames = orderBy(
-		games,
-		[
-			(g) => isClose(g),
-			(g) => isUpset(g),
-			(g) => g.period,
-			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
-		],
-		['desc', 'desc', 'desc'], // boolean results need desc sorting
-	).filter((g) => g.gameState === 'live')
-
-	const finishedGames = orderBy(
-		games,
-		[
-			(g) => isUpset(g),
-			(g) => isClose(g),
-			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
-		],
-		['desc', 'desc'], // boolean results need desc sorting
-	).filter((g) => g.gameState === 'final')
-
-	return { games, inProgressGames, finishedGames, fetching }
-}
-
-function isUpset(game: Game) {
-	const team1 = game.teams[0]
-	const team2 = game.teams[1]
-
-	return (
-		(team1.seed > team2.seed && team1.score > team2.score) ||
-		(team2.seed > team1.seed && team2.score > team1.score)
-	)
-}
-
-function isClose(game: Game) {
-	const team1 = game.teams[0]
-	const team2 = game.teams[1]
-	const scoreDifference = Math.abs(team1.score - team2.score)
-
-	const period = game.period
-	const timeChunks = game.contestClock.split(':')
-	const minutes = Number(timeChunks[0])
-	const seconds = Number(timeChunks[1])
-	const secondsRemainingInPeriod = minutes * 60 + seconds
-
-	return (
-		((((game.gender === 'men' && period === 2) ||
-			(game.gender === 'women' && period === 4)) &&
-			secondsRemainingInPeriod <= 300) ||
-			game.gameState === 'final') &&
-		scoreDifference <= 10
-	)
-}
-
 function Game({ game }: { game: Game }) {
 	const team1 = game.teams[0]
 	const team2 = game.teams[1]
-	const isClose_ = isClose(game)
-	const isUpset_ = isUpset(game)
 	return (
 		<div
 			key={game.id}
@@ -104,12 +23,12 @@ function Game({ game }: { game: Game }) {
 				game.gameState === 'live' || game.gameState === 'final' ? '' : ' hidden'
 			}${game.gameState === 'final' ? ' text-black/40' : ''}`}
 		>
-			{isClose_ ? (
+			{game.close ? (
 				<div>
 					<strong>Close game{game.gameState === 'final' ? '' : '!'}</strong>
 				</div>
 			) : null}
-			{isUpset_ ? (
+			{game.upset ? (
 				<div>
 					<strong>
 						{game.gameState === 'final' ? 'Upset' : 'Potential upset'}
@@ -183,18 +102,30 @@ function useDefaultGenderCookie() {
 	}, [])
 }
 
-type Props = {
-	gender: Gender
-	getScores: (gender: Gender) => Promise<Game[]>
-	initialGames: Game[]
+function useAutoRefresh() {
+	const [isPending, startTransition] = useTransition()
+	const router = useRouter()
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			startTransition(() => {
+				router.refresh()
+			})
+		}, 15000)
+		return () => clearInterval(interval)
+	}, [router])
+
+	return isPending
 }
 
-export default function CloseGames({ gender, getScores, initialGames }: Props) {
-	const { inProgressGames, finishedGames, fetching } = useGames(
-		gender,
-		initialGames,
-		getScores,
-	)
+type Props = {
+	gender: Gender
+	inProgressGames: Game[]
+	finishedGames: Game[]
+}
+
+export default function CloseGames({ gender, inProgressGames, finishedGames }: Props) {
+	const updating = useAutoRefresh()
 
 	useDefaultGenderCookie()
 
@@ -208,7 +139,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 				/>
 				<div className="flex">
 					<h1 className="grow">ncaa close games</h1>
-					<p className={fetching ? undefined : 'invisible'}>
+					<p className={updating ? undefined : 'invisible'}>
 						updating...
 					</p>
 				</div>

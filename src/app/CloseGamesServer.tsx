@@ -1,13 +1,7 @@
 import { cookies } from 'next/headers'
+import { orderBy } from 'lodash'
 import CloseGames from './CloseGames'
-import {
-	menContestToGame,
-	womenGameToGame,
-	Contest,
-	WomenGame,
-	genders,
-	Gender,
-} from './models'
+import { menContestToGame, Contest, genders, Gender, Game } from './models'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 
@@ -84,9 +78,7 @@ const scoresUrls = {
 	},
 }
 
-export async function getScores(gender: Gender) {
-	'use server'
-
+async function getScores(gender: Gender) {
 	if (!genders.includes(gender)) {
 		notFound()
 	}
@@ -113,6 +105,67 @@ export async function getScores(gender: Gender) {
 	return contests.map(menContestToGame)
 }
 
+function isUpset(game: Game) {
+	const team1 = game.teams[0]
+	const team2 = game.teams[1]
+
+	return (
+		(team1.seed > team2.seed && team1.score > team2.score) ||
+		(team2.seed > team1.seed && team2.score > team1.score)
+	)
+}
+
+function isClose(game: Game) {
+	const team1 = game.teams[0]
+	const team2 = game.teams[1]
+	const scoreDifference = Math.abs(team1.score - team2.score)
+
+	const period = game.period
+	const timeChunks = game.contestClock.split(':')
+	const minutes = Number(timeChunks[0])
+	const seconds = Number(timeChunks[1])
+	const secondsRemainingInPeriod = minutes * 60 + seconds
+
+	return (
+		((((game.gender === 'men' && period === 2) ||
+			(game.gender === 'women' && period === 4)) &&
+			secondsRemainingInPeriod <= 300) ||
+			game.gameState === 'final') &&
+		scoreDifference <= 10
+	)
+}
+
+function sortGames(games: Game[]) {
+	const annotated = games.map((g) => ({
+		...g,
+		close: isClose(g),
+		upset: isUpset(g),
+	}))
+
+	const inProgressGames = orderBy(
+		annotated,
+		[
+			(g) => g.close,
+			(g) => g.upset,
+			(g) => g.period,
+			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
+		],
+		['desc', 'desc', 'desc'],
+	).filter((g) => g.gameState === 'live')
+
+	const finishedGames = orderBy(
+		annotated,
+		[
+			(g) => g.upset,
+			(g) => g.close,
+			(g) => Math.abs(g.teams[0].score - g.teams[1].score),
+		],
+		['desc', 'desc'],
+	).filter((g) => g.gameState === 'final')
+
+	return { inProgressGames, finishedGames }
+}
+
 export default async function CloseGamesServer({
 	params: { gender },
 }: {
@@ -121,8 +174,14 @@ export default async function CloseGamesServer({
 	gender = gender ?? cookies().get('default_gender')?.value ?? 'men'
 
 	const games = await getScores(gender)
+	const { inProgressGames, finishedGames } = sortGames(games)
 
 	return (
-		<CloseGames key={gender} gender={gender} getScores={getScores} initialGames={games} />
+		<CloseGames
+			key={gender}
+			gender={gender}
+			inProgressGames={inProgressGames}
+			finishedGames={finishedGames}
+		/>
 	)
 }

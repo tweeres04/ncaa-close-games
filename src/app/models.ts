@@ -63,6 +63,8 @@ export type Game = {
 	contestClock: string
 	gameState: 'final' | 'live' | 'pre'
 	gender: Gender
+	close?: boolean
+	upset?: boolean
 }
 
 const menGameStateToGameState: Record<Contest['gameState'], Game['gameState']> =
