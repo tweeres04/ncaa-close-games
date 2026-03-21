@@ -19,20 +19,17 @@ function useGames(
 ) {
 	const [games, setGames] = useState<Game[]>(initialGames)
 	const [fetching, setFetching] = useState(false)
-	const [firstFetch, setFirstFetch] = useState(true)
 
 	useEffect(() => {
 		async function fetchGames() {
 			setFetching(true)
 			const games = await getScores(gender).finally(() => {
 				setFetching(false)
-				setFirstFetch(false)
 			})
 			setGames(games)
 		}
 
 		const intervalHandle = setInterval(fetchGames, 15000)
-		fetchGames()
 
 		function cleanup() {
 			clearInterval(intervalHandle)
@@ -62,7 +59,7 @@ function useGames(
 		['desc', 'desc'], // boolean results need desc sorting
 	).filter((g) => g.gameState === 'final')
 
-	return { games, inProgressGames, finishedGames, fetching, firstFetch }
+	return { games, inProgressGames, finishedGames, fetching }
 }
 
 function isUpset(game: Game) {
@@ -193,7 +190,7 @@ type Props = {
 }
 
 export default function CloseGames({ gender, getScores, initialGames }: Props) {
-	const { inProgressGames, finishedGames, fetching, firstFetch } = useGames(
+	const { inProgressGames, finishedGames, fetching } = useGames(
 		gender,
 		initialGames,
 		getScores,
@@ -211,7 +208,7 @@ export default function CloseGames({ gender, getScores, initialGames }: Props) {
 				/>
 				<div className="flex">
 					<h1 className="grow">ncaa close games</h1>
-					<p className={fetching && !firstFetch ? undefined : 'invisible'}>
+					<p className={fetching ? undefined : 'invisible'}>
 						updating...
 					</p>
 				</div>
